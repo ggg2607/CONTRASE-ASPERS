@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Contraseñas Seguras</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: #1e1e1e;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+        }
+        .password-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        input {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 15px;
+            border: none;
+            background: #007bff;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .options {
+            text-align: left;
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin: 5px 0;
+        }
+        #strength {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Generador de Contraseñas Seguras</h1>
+        <div class="password-container">
+            <input type="text" id="password" readonly>
+            <button id="copy">Copiar</button>
+        </div>
+        <div class="options">
+            <label>Longitud: <span id="lengthValue">12</span></label>
+            <input type="range" id="length" min="8" max="50" value="12">
+            <label><input type="checkbox" id="uppercase" checked> Mayúsculas</label>
+            <label><input type="checkbox" id="lowercase" checked> Minúsculas</label>
+            <label><input type="checkbox" id="numbers" checked> Números</label>
+            <label><input type="checkbox" id="symbols" checked> Símbolos</label>
+        </div>
+        <button id="generate">Generar Contraseña</button>
+        <p id="strength"></p>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const passwordField = document.getElementById("password");
+            const copyButton = document.getElementById("copy");
+            const lengthSlider = document.getElementById("length");
+            const lengthValue = document.getElementById("lengthValue");
+            const uppercaseCheck = document.getElementById("uppercase");
+            const lowercaseCheck = document.getElementById("lowercase");
+            const numbersCheck = document.getElementById("numbers");
+            const symbolsCheck = document.getElementById("symbols");
+            const generateButton = document.getElementById("generate");
+            const strengthIndicator = document.getElementById("strength");
+            const symbols = "!@#$%^&*()_+[]{}|;:,.<>?";
+            
+            function generatePassword() {
+                const length = parseInt(lengthSlider.value);
+                let characters = "";
+                let password = "";
+                if (uppercaseCheck.checked) characters += "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+                if (lowercaseCheck.checked) characters += "abcdefghijklmnopqrstuvwxyz";
+                if (numbersCheck.checked) characters += "0123456789";
+                if (symbolsCheck.checked) characters += symbols;
+                if (characters.length === 0) {
+                    passwordField.value = "Selecciona al menos una opción";
+                    return;
+                }
+                const array = new Uint32Array(length);
+                window.crypto.getRandomValues(array);
+                for (let i = 0; i < length; i++) {
+                    password += characters[array[i] % characters.length];
+                }
+                passwordField.value = password;
+                evaluateStrength(password);
+            }
+            
+            function evaluateStrength(password) {
+                let strength = "Débil";
+                let regexStrong = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{12,}$/;
+                let regexMedium = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+                if (regexStrong.test(password)) {
+                    strength = "Fuerte";
+                } else if (regexMedium.test(password)) {
+                    strength = "Media";
+                }
+                strengthIndicator.textContent = `Seguridad: ${strength}`;
+            }
+            
+            copyButton.addEventListener("click", () => {
+                passwordField.select();
+                document.execCommand("copy");
+            });
+            
+            lengthSlider.addEventListener("input", () => {
+                lengthValue.textContent = lengthSlider.value;
+            });
+            
+            generateButton.addEventListener("click", generatePassword);
+        });
+    </script>
+</body>
+</html>
