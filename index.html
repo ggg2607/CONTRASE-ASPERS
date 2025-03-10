@@ -5,136 +5,108 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Generador de Contraseñas Seguras</title>
     <style>
+        :root {
+            --color-fondo: #e6f9f8; /* Turquesa claro */
+            --color-blanco: #ffffff;
+            --color-gris: #d9dadb;
+            --color-verde-lima: #d9f99d; /* Verde lima suave */
+            --color-azul: #007bff; /* Azul institucional */
+            --color-azul-oscuro: #0056b3;
+        }
+
         body {
             font-family: Arial, sans-serif;
-            background-color: #121212;
-            color: #fff;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
+            background-color: var(--color-fondo);
             margin: 0;
         }
+        
         .container {
-            background: #1e1e1e;
+            background: var(--color-blanco);
             padding: 20px;
             border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             text-align: center;
             width: 90%;
             max-width: 400px;
+            border: 2px solid var(--color-verde-lima);
         }
-        .password-container {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
+
+        .logo {
+            width: 120px;
+            margin-bottom: 20px;
         }
-        input {
-            flex: 1;
-            padding: 10px;
-            border: none;
+
+        h2 {
+            color: var(--color-azul);
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid var(--color-gris);
             border-radius: 5px;
+            font-size: 1.2em;
+            background-color: var(--color-verde-lima);
+            color: #333;
         }
+
         button {
-            padding: 10px 15px;
-            border: none;
-            background: #007bff;
+            background: var(--color-azul);
             color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 1em;
             border-radius: 5px;
             cursor: pointer;
+            transition: background 0.3s ease;
+            width: 100%;
         }
+
         button:hover {
-            background: #0056b3;
+            background: var(--color-azul-oscuro);
         }
-        .options {
-            text-align: left;
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin: 5px 0;
-        }
-        #strength {
-            margin-top: 10px;
-            font-weight: bold;
+
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #333;
+            }
+            .container {
+                background-color: #444;
+                color: #eee;
+            }
+            input[type="text"] {
+                background-color: #555;
+                color: #eee;
+                border-color: #666;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Generador de Contraseñas Seguras</h1>
-        <div class="password-container">
-            <input type="text" id="password" readonly>
-            <button id="copy">Copiar</button>
-        </div>
-        <div class="options">
-            <label>Longitud: <span id="lengthValue">12</span></label>
-            <input type="range" id="length" min="8" max="50" value="12">
-            <label><input type="checkbox" id="uppercase" checked> Mayúsculas</label>
-            <label><input type="checkbox" id="lowercase" checked> Minúsculas</label>
-            <label><input type="checkbox" id="numbers" checked> Números</label>
-            <label><input type="checkbox" id="symbols" checked> Símbolos</label>
-        </div>
-        <button id="generate">Generar Contraseña</button>
-        <p id="strength"></p>
+        <!-- Agrega aquí la ruta correcta de tu logo TMV FARM -->
+        <img src="logo-tmvfarm.png" alt="TMV FARM Logo" class="logo">
+        <h2>Generador de Contraseñas</h2>
+        <input type="text" id="password" readonly aria-label="Campo de contraseña generada">
+        <button onclick="generatePassword()" aria-label="Generar nueva contraseña">Generar Contraseña</button>
     </div>
     <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const passwordField = document.getElementById("password");
-            const copyButton = document.getElementById("copy");
-            const lengthSlider = document.getElementById("length");
-            const lengthValue = document.getElementById("lengthValue");
-            const uppercaseCheck = document.getElementById("uppercase");
-            const lowercaseCheck = document.getElementById("lowercase");
-            const numbersCheck = document.getElementById("numbers");
-            const symbolsCheck = document.getElementById("symbols");
-            const generateButton = document.getElementById("generate");
-            const strengthIndicator = document.getElementById("strength");
-            const symbols = "!@#$%^&*()_+[]{}|;:,.<>?";
-            
-            function generatePassword() {
-                const length = parseInt(lengthSlider.value);
-                let characters = "";
-                let password = "";
-                if (uppercaseCheck.checked) characters += "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-                if (lowercaseCheck.checked) characters += "abcdefghijklmnopqrstuvwxyz";
-                if (numbersCheck.checked) characters += "0123456789";
-                if (symbolsCheck.checked) characters += symbols;
-                if (characters.length === 0) {
-                    passwordField.value = "Selecciona al menos una opción";
-                    return;
-                }
-                const array = new Uint32Array(length);
-                window.crypto.getRandomValues(array);
-                for (let i = 0; i < length; i++) {
-                    password += characters[array[i] % characters.length];
-                }
-                passwordField.value = password;
-                evaluateStrength(password);
+        function generatePassword() {
+            const length = 16;
+            const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+";
+            let password = "";
+            for (let i = 0; i < length; i++) {
+                const randomIndex = Math.floor(Math.random() * charset.length);
+                password += charset[randomIndex];
             }
-            
-            function evaluateStrength(password) {
-                let strength = "Débil";
-                let regexStrong = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{12,}$/;
-                let regexMedium = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
-                if (regexStrong.test(password)) {
-                    strength = "Fuerte";
-                } else if (regexMedium.test(password)) {
-                    strength = "Media";
-                }
-                strengthIndicator.textContent = `Seguridad: ${strength}`;
-            }
-            
-            copyButton.addEventListener("click", () => {
-                passwordField.select();
-                document.execCommand("copy");
-            });
-            
-            lengthSlider.addEventListener("input", () => {
-                lengthValue.textContent = lengthSlider.value;
-            });
-            
-            generateButton.addEventListener("click", generatePassword);
-        });
+            document.getElementById("password").value = password;
+        }
     </script>
 </body>
 </html>
